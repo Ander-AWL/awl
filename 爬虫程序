@@ -1,0 +1,126 @@
+#导入板块
+import re
+import requests
+import smtplib
+from email.mime.text import MIMEText
+from email.utils import formataddr
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.header import Header
+
+
+#爬取课程表
+def Req():
+    url = '课程表的URL'
+    headers = {
+               'User-Agent':'',
+               'Host':'',
+               'Upgrade-Insecure-Requests': '',
+               'Accept':'',
+               'Referer':'',
+               'Accept-Encoding': '',
+               'Accept-Language': '',
+               'Connection': ''
+               }
+
+
+    ret = requests.get(url, headers=headers)
+    print(ret.text)
+
+# 按间距中的绿色按钮以运行脚本。
+if __name__ == '__main__':
+   Req()
+
+
+
+#爬取成绩单
+url = '成绩网页的URL'
+
+form = {
+        '__EVENTTARGET': '',
+        '__EVENTARGUMENT': '',
+        '__VIEWSTATE': '',   #插入URL解码
+        'hidLanguage': '',
+        'ddlXN': '',   #学年
+        'ddlXQ': '',   #学期
+        'ddl_kcxz': '',
+        'btn_zcj': ''
+       }
+
+headers = {
+               'User-Agent':'',
+               'Host':'',
+               'Upgrade-Insecure-Requests': '',
+               'Accept':'',
+               'Referer':'',
+               'Accept-Encoding': '',
+               'Accept-Language': '',
+               'Connection': ''
+          }
+
+ret = requests.post(url, headers=headers,data=form)
+print(ret.text)
+
+
+
+#用正则表达式输出成绩
+content = '''
+          '''
+texts = re.findall(r'[\u4e00-\u9fa50-9]', content, re.S)
+texts ="".join(texts)
+print(texts)
+
+
+
+#发送邮件
+url = '成绩网页的URL'
+
+form = {
+        '__EVENTTARGET': '',
+        '__EVENTARGUMENT': '',
+        '__VIEWSTATE': '',   #插入URL解码
+        'hidLanguage': '',
+        'ddlXN': '',    #学年
+        'ddlXQ': '',   #学期
+        'ddl_kcxz': '',
+        'btn_zcj': ''
+       }
+
+headers = {
+               'User-Agent':'',
+               'Host':'',
+               'Upgrade-Insecure-Requests': '',
+               'Accept':'',
+               'Referer':'',
+               'Accept-Encoding': '',
+               'Accept-Language': '',
+               'Connection': ''
+          }
+
+
+file = '发送文本文档的地址'
+host = 'smtp.qq.com'
+port = 465   #邮箱端口
+
+# qq邮箱和授权码
+username = '发送的邮箱地址'
+password = '邮箱的授权码'
+
+# 发送账户
+to_addr = '发送的邮箱地址'
+message = MIMEMultipart()
+message['From'] = Header("实验", 'utf-8')
+message['To'] = Header("测试", 'utf-8')
+subject = '期末成绩'
+message['Subject'] = Header(subject, 'utf-8')
+message.attach(MIMEText('当前成绩', 'plain', 'utf-8'))  # 邮件内容
+msg1 = MIMEText(open(file, 'rb').read(), 'base64', 'utf-8')  # 邮件附件
+msg1["Content-Type"] = 'application/octet-stream'
+msg1["Content-Disposition"] = 'attachment;filename="chengji.txt"'
+message.attach(msg1)
+server = smtplib.SMTP_SSL(host, )
+server.connect(host, port)
+server.login(username, password)  # 登录smtp服务
+server.sendmail(username, to_addr, message.as_string())
+server.quit()
+print("发送成功")
